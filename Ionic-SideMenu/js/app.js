@@ -8,10 +8,15 @@ angular.module('starter', ['ionic', 'starter.controllers'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
-    if(window.StatusBar) {
-      // org.apache.cordova.statusbar required
-      StatusBar.styleDefault();
+    if (StatusBar.isVisible) {
+        // do something
+        StatusBar.hide();
     }
+   //if(window.StatusBar) {
+      // org.apache.cordova.statusbar required
+      //StatusBar.styleDefault();
+      StatusBar.hide();
+    //}
   });
 })
 

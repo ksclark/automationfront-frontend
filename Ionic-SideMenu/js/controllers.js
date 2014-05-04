@@ -1,11 +1,13 @@
 // http://codepen.io/anon/pen/nFmuc
 //http://jsfiddle.net/sander_van_dam/m5YJu/ - Angular JS knob.js full example
 //http://plnkr.co/edit/ULmvU0nJeQpChyEU02a3?p=preview
+// http://forum.ionicframework.com/t/gap-above-header-at-top-of-screen-when-in-fullscreen-on-ios-7-android-displays-properly/478/4
 angular.module('starter.controllers', [])
 
 
 .controller('AppCtrl', ['$scope','$http','$location', function($scope,$http,$location) {
 	var current_page = $location.url()
+    ionic.Platform.fullScreen() 
 	
 	  $scope.goTo = function(path_variable){
 			switch(path_variable){

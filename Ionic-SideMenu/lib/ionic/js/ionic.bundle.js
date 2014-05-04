@@ -9,7 +9,7 @@
  * Copyright 2014 Drifty Co.
  * http://drifty.com/
  *
- * Ionic, v1.0.0-beta.3
+ * Ionic, v1.0.0-beta.2
  * A powerful HTML5 mobile app framework.
  * http://ionicframework.com/
  *
@@ -26,7 +26,7 @@
 window.ionic = {
   controllers: {},
   views: {},
-  version: '1.0.0-beta.3'
+  version: '1.0.0-beta.2'
 };
 
 (function(ionic) {
@@ -402,8 +402,7 @@ window.ionic = {
   //Shortcuts
   ionic.requestAnimationFrame = ionic.DomUtil.requestAnimationFrame;
   ionic.animationFrameThrottle = ionic.DomUtil.animationFrameThrottle;
-})(window, document, ionic);
-
+})(this, document, ionic);
 /**
  * ion-events.js
  *
@@ -681,7 +680,7 @@ window.ionic = {
     // whatever lookup was done to find this element failed to find it
     // so we can't listen for events on it.
     if(element === null) {
-      void 0;
+      console.error('Null element passed to gesture (element does not exist). Not listening for gesture');
       return;
     }
 
@@ -2049,7 +2048,7 @@ window.ionic = {
      */
     device: function() {
       if(window.device) return window.device;
-      if(this.isWebView()) void 0;
+      if(this.isWebView()) console.error('device plugin required');
       return {};
     },
 
@@ -2553,7 +2552,7 @@ function tapClick(e) {
 
   var c = getPointerCoordinates(e);
 
-  void 0;
+  console.debug('tapClick', e.type, ele.tagName, '('+c.x+','+c.y+')');
   triggerMouseEvent('click', ele, c.x, c.y);
 
   // if it's an input, focus in on the target, otherwise blur
@@ -2577,7 +2576,7 @@ function tapClickGateKeeper(e) {
   // do not allow through any click events that were not created by ionic.tap
   if( (ionic.scroll.isScrolling && ionic.tap.containsOrIsTextInput(e.target) ) ||
       (!e.isIonicTap && !tapRequiresNativeClick(e.target)) ) {
-    void 0;
+    console.debug('clickPrevent', e.target.tagName);
     e.stopPropagation();
 
     if( !ionic.tap.isLabelWithTextInput(e.target) ) {
@@ -2609,7 +2608,7 @@ function tapMouseDown(e) {
   if(e.isIonicTap || tapIgnoreEvent(e)) return;
 
   if(tapEnabledTouchEvents) {
-    void 0;
+    console.debug('mousedown', 'stop event');
     e.stopPropagation();
 
     if( !ionic.tap.isTextInput(e.target) ) {
@@ -2765,7 +2764,7 @@ function tapHandleFocus(ele) {
 function tapFocusOutActive() {
   var ele = tapActiveElement();
   if(ele && (/input|textarea|select/i).test(ele.tagName) ) {
-    void 0;
+    console.debug('tapFocusOutActive', ele.tagName);
     ele.blur();
   }
   tapActiveElement(null);
@@ -2785,7 +2784,7 @@ function tapFocusIn(e) {
     // 2) There is an active element which is a text input
     // 3) A text input was just set to be focused on by a touch event
     // 4) A new focus has been set, however the target isn't the one the touch event wanted
-    void 0;
+    console.debug('focusin', 'tapTouchFocusedInput');
     tapTouchFocusedInput.focus();
     tapTouchFocusedInput = null;
   }
@@ -3215,12 +3214,12 @@ function keyboardShow(element, elementTop, elementBottom, viewportHeight, keyboa
     details.contentHeight = viewportHeight;
   }
 
-  void 0;
+  console.debug('keyboardShow', keyboardHeight, details.contentHeight);
 
   // distance from top of input to the top of the keyboard
   details.keyboardTopOffset = details.elementTop - details.contentHeight;
 
-  void 0;
+  console.debug('keyboardTopOffset', details.elementTop, details.contentHeight, details.keyboardTopOffset);
 
   // figure out if the element is under the keyboard
   details.isElementUnderKeyboard = (details.elementBottom > details.contentHeight);
@@ -3251,7 +3250,7 @@ function keyboardFocusOut(e) {
 }
 
 function keyboardHide() {
-  void 0;
+  console.debug('keyboardHide');
   ionic.keyboard.isOpen = false;
 
   ionic.trigger('resetScrollView', {
@@ -3444,7 +3443,6 @@ ionic.DomUtil.ready(function() {
  * rendering. This eases a lot of cases where it might be pretty complex to break down a state
  * based on the pure time difference.
  */
-var zyngaCore = { effect: {} };
 (function(global) {
   var time = Date.now || function() {
     return +new Date();
@@ -3454,7 +3452,15 @@ var zyngaCore = { effect: {} };
   var running = {};
   var counter = 1;
 
-  zyngaCore.effect.Animate = {
+  // Create namespaces
+  if (!global.core) {
+    var core = global.core = { effect : {} };
+
+  } else if (!core.effect) {
+    core.effect = {};
+  }
+
+  core.effect.Animate = {
 
     /**
      * A requestAnimationFrame wrapper / polyfill.
@@ -3636,7 +3642,7 @@ var zyngaCore = { effect: {} };
           completedCallback && completedCallback(desiredFrames - (dropCounter / ((now - start) / millisecondsPerSecond)), id, percent === 1 || duration == null);
         } else if (render) {
           lastFrame = now;
-          zyngaCore.effect.Animate.requestAnimationFrame(step, root);
+          core.effect.Animate.requestAnimationFrame(step, root);
         }
       };
 
@@ -3644,7 +3650,7 @@ var zyngaCore = { effect: {} };
       running[id] = true;
 
       // Init first step
-      zyngaCore.effect.Animate.requestAnimationFrame(step, root);
+      core.effect.Animate.requestAnimationFrame(step, root);
 
       // Return unique animation ID
       return id;
@@ -4060,7 +4066,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
           //middle of the scrollview, where we want to scroll to
           var scrollViewMidpointOffset = container.clientHeight * 0.5;
           var scrollTop = e.detail.keyboardTopOffset + scrollViewMidpointOffset;
-          void 0;
+          console.debug('scrollChildIntoView', scrollTop);
           ionic.tap.cloneFocusedInput(container, self);
           self.scrollBy(0, scrollTop, true);
           self.onScroll();
@@ -4689,7 +4695,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
 
     // Stop deceleration
     if (self.__isDecelerating) {
-      zyngaCore.effect.Animate.stop(self.__isDecelerating);
+      core.effect.Animate.stop(self.__isDecelerating);
       self.__isDecelerating = false;
     }
 
@@ -4764,7 +4770,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
 
     // Stop deceleration
     if (self.__isDecelerating) {
-      zyngaCore.effect.Animate.stop(self.__isDecelerating);
+      core.effect.Animate.stop(self.__isDecelerating);
       self.__isDecelerating = false;
     }
 
@@ -4896,14 +4902,14 @@ ionic.views.Scroll = ionic.views.View.inherit({
 
     // Stop deceleration
     if (self.__isDecelerating) {
-      zyngaCore.effect.Animate.stop(self.__isDecelerating);
+      core.effect.Animate.stop(self.__isDecelerating);
       self.__isDecelerating = false;
       self.__interruptedAnimation = true;
     }
 
     // Stop animation
     if (self.__isAnimating) {
-      zyngaCore.effect.Animate.stop(self.__isAnimating);
+      core.effect.Animate.stop(self.__isAnimating);
       self.__isAnimating = false;
       self.__interruptedAnimation = true;
     }
@@ -5286,7 +5292,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
     // Remember whether we had an animation, then we try to continue based on the current "drive" of the animation
     var wasAnimating = self.__isAnimating;
     if (wasAnimating) {
-      zyngaCore.effect.Animate.stop(wasAnimating);
+      core.effect.Animate.stop(wasAnimating);
       self.__isAnimating = false;
     }
 
@@ -5339,7 +5345,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
       };
 
       // When continuing based on previous animation we choose an ease-out animation instead of ease-in-out
-      self.__isAnimating = zyngaCore.effect.Animate.start(step, verify, completed, self.options.animationDuration, wasAnimating ? easeOutCubic : easeInOutCubic);
+      self.__isAnimating = core.effect.Animate.start(step, verify, completed, self.options.animationDuration, wasAnimating ? easeOutCubic : easeInOutCubic);
 
     } else {
 
@@ -5471,7 +5477,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
     };
 
     // Start animation and switch on flag
-    self.__isDecelerating = zyngaCore.effect.Animate.start(step, verify, completed);
+    self.__isDecelerating = core.effect.Animate.start(step, verify, completed);
 
   },
 
@@ -6397,8 +6403,6 @@ ionic.scroll = {
 
 ionic.views.Slider = ionic.views.View.inherit({
   initialize: function (options) {
-    var slider = this;
-
     // utilities
     var noop = function() {}; // simple no operation function
     var offloadFn = function(fn) { setTimeout(fn || noop, 0) }; // offload a functions execution
@@ -6642,8 +6646,8 @@ ionic.views.Slider = ionic.views.View.inherit({
         switch (event.type) {
           case 'mousedown': this.start(event); break;
           case 'touchstart': this.start(event); break;
-          case 'touchmove': this.touchmove(event); break;
-          case 'mousemove': this.touchmove(event); break;
+          case 'touchmove': this.move(event); break;
+          case 'mousemove': this.move(event); break;
           case 'touchend': offloadFn(this.end(event)); break;
           case 'mouseup': offloadFn(this.end(event)); break;
           case 'webkitTransitionEnd':
@@ -6689,15 +6693,10 @@ ionic.views.Slider = ionic.views.View.inherit({
           document.addEventListener('mouseup', this, false);
         }
       },
-      touchmove: function(event) {
+      move: function(event) {
 
         // ensure swiping with one touch and not pinching
-        // ensure sliding is enabled
-        if (event.touches.length > 1 ||
-            event.scale && event.scale !== 1 ||
-            slider.slideIsDisabled) {
-          return;
-        }
+        if ( event.touches.length > 1 || event.scale && event.scale !== 1) return
 
         if (options.disableScroll) event.preventDefault();
 
@@ -6861,12 +6860,6 @@ ionic.views.Slider = ionic.views.View.inherit({
       setup();
     };
 
-    this.enableSlide = function(shouldEnable) {
-      if (arguments.length) {
-        this.slideIsDisabled = !shouldEnable;
-      }
-      return !this.slideIsDisabled;
-    },
     this.slide = function(to, speed) {
       // cancel slideshow
       stop();
@@ -32175,7 +32168,7 @@ angular.module('ui.router.compat')
  * Copyright 2014 Drifty Co.
  * http://drifty.com/
  *
- * Ionic, v1.0.0-beta.3
+ * Ionic, v1.0.0-beta.2
  * A powerful HTML5 mobile app framework.
  * http://ionicframework.com/
  *
@@ -32232,6 +32225,10 @@ var deprecated = {
 };
 
 
+/**
+ * Create a wrapping module to ease having to include too many
+ * modules.
+ */
 var IonicModule = angular.module('ionic', [
   // Angular deps
   'ngAnimate',
@@ -34662,13 +34659,6 @@ IonicModule
    * @param {number=} speed The number of milliseconds for the change to take.
    */
   'slide',
-  /**
-   * @ngdoc method
-   * @name $ionicSlideBoxDelegate#enableSlide
-   * @param {boolean=} shouldEnable Whether to enable sliding the slidebox.
-   * @returns {boolean} Whether sliding is enabled.
-   */
-  'enableSlide',
   /**
    * @ngdoc method
    * @name $ionicSlideBoxDelegate#previous
@@ -38524,7 +38514,7 @@ function($timeout, $compile, $ionicSlideBoxDelegate) {
       };
 
       this.onPagerClick = function(index) {
-        void 0;
+        console.log('pagerClick', index);
         $scope.pagerClick({index: index});
       };
 
@@ -38649,11 +38639,16 @@ function($rootScope, $animate, $ionicBind, $compile) {
     controller: '$ionicTab',
     scope: true,
     compile: function(element, attr) {
+      var navView = element[0].querySelector('ion-nav-view') ||
+        element[0].querySelector('data-ion-nav-view');
+      var navViewName = navView && navView.getAttribute('name');
 
-      //We create the tabNavTemplate in the compile phase so that the
+
+      //We create the tabNavElement in the compile phase so that the
       //attributes we pass down won't be interpolated yet - we want
       //to pass down the 'raw' versions of the attributes
-      var tabNavTemplate = '<ion-tab-nav' +
+      var tabNavElement = angular.element(
+        '<ion-tab-nav' +
         attrStr('ng-click', attr.ngClick) +
         attrStr('title', attr.title) +
         attrStr('icon', attr.icon) +
@@ -38661,7 +38656,8 @@ function($rootScope, $animate, $ionicBind, $compile) {
         attrStr('icon-off', attr.iconOff) +
         attrStr('badge', attr.badge) +
         attrStr('badge-style', attr.badgeStyle) +
-        '></ion-tab-nav>';
+        '></ion-tab-nav>'
+      );
 
       //Remove the contents of the element so we can compile them later, if tab is selected
       //We don't use regular transclusion because it breaks element inheritance
@@ -38673,10 +38669,6 @@ function($rootScope, $animate, $ionicBind, $compile) {
         var childElement;
         var tabsCtrl = ctrls[0];
         var tabCtrl = ctrls[1];
-
-        var navView = tabContent[0].querySelector('ion-nav-view') ||
-          tabContent[0].querySelector('data-ion-nav-view');
-        var navViewName = navView && navView.getAttribute('name');
 
         $ionicBind($scope, $attr, {
           animate: '=',
@@ -38708,7 +38700,6 @@ function($rootScope, $animate, $ionicBind, $compile) {
           }
         }
 
-        var tabNavElement = angular.element(tabNavTemplate);
         tabNavElement.data('$ionTabsController', tabsCtrl);
         tabNavElement.data('$ionTabController', tabCtrl);
         tabsCtrl.$tabsElement.append($compile(tabNavElement)($scope));
